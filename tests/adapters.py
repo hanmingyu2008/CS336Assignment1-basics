@@ -5,8 +5,7 @@ import sys
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
-from cs336_basics.train_bpe import train_bpe
-from cs336_basics.tokenizer import Tokenizer
+
 from collections.abc import Iterable
 from typing import IO, Any, BinaryIO
 
@@ -18,6 +17,11 @@ import numpy as np
 import regex as re
 from collections import defaultdict, Counter
 from typing import Dict, List, Tuple, Union, Iterable, Optional
+
+from cs336_basics.train_bpe import train_bpe
+from cs336_basics.tokenizer import Tokenizer
+from cs336_basics.Linear import Linear
+from cs336_basics.Embedding import Embedding
 
 PAT = r"""'(?:[sdmt]|ll|ve|re)| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
 def to_bytes_tuple(word: str) -> Tuple[bytes]:
@@ -44,7 +48,10 @@ def run_linear(
         Float[Tensor, "... d_out"]: The transformed output of your linear module.
     """
 
-    raise NotImplementedError
+    model = Linear(d_in, d_out)
+    model.load_state_dict({"W":weights})
+
+    return model(in_features)
 
 
 def run_embedding(
@@ -66,7 +73,9 @@ def run_embedding(
         Float[Tensor, "... d_model"]: Batch of embeddings returned by your Embedding layer.
     """
 
-    raise NotImplementedError
+    model = Embedding(num_embeddings=vocab_size, embedding_dim=d_model)
+    model.load_state_dict({"embedding_matrix":weights})
+    return model(token_ids) 
 
 
 def run_swiglu(
